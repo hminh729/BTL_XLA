@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Sketch Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            background: #f2f2f2;
+        }
+        .container {
+            width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Sketch Image Converter</h2>
+    <form id="uploadForm">
+        <input type="file" id="files" name="files" accept="image/*" multiple required>
+        <br>
+        <button type="submit">Convert to Sketch</button>
+    </form>
+
+    <p id="status"></p>
+</div>
+
+<script>
+document.getElementById("uploadForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const files = document.getElementById("files").files;
+    if (files.length === 0) {
+        alert("Please choose at least one image!");
+        return;
+    }
+
+    const formData = new FormData();
+    for (let file of files) {
+        formData.append("files", file);
+    }
+
+    document.getElementById("status").innerText = "Processing... Please wait.";
+
+    const response = await fetch("/api/post-imgs", {
+        method: "POST",
+        body: formData
+    });
+
+    const blob = await response.blob();
+
+    // Tải file ZIP về
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sketch_results.zip";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    document.getElementById("status").innerText = "Done! ZIP downloaded.";
+});
+</script>
+
+</body>
+</html>

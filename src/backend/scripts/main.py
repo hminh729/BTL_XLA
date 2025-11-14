@@ -1,27 +1,22 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 from controller import post_imgs
 
 app = FastAPI()
 
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-]
+# Static files (CSS, JS)
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Templates
+templates = Jinja2Templates(directory="templates")
 
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/")
-def read_root():
-    return "Select img to start"
-
-# Route từ controller
-
+# API xử lý ảnh
 app.post("/api/post-imgs")(post_imgs)
