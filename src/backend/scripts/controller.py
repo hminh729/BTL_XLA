@@ -8,14 +8,7 @@ from typing import List
 from fastapi import UploadFile, File, Form
 from fastapi.responses import StreamingResponse
 
-from utils.imgUtils import (
-    rgb2gray_manual,
-    bilateral_filter_manual,
-    sobel_edge_manual,
-    prewitt_edge_manual,
-    scharr_edge_manual,
-    laplacian_edge_manual
-)
+from utils.imgUtils import *
 
 async def post_imgs(
         files: List[UploadFile] = File(...),
@@ -46,7 +39,7 @@ async def post_imgs(
                 #  tao anh am ban de tao hieu ung but chi
                 invert = 255 - gray
                 # Gaussian blur
-                blur = cv2.GaussianBlur(invert, (21, 21), 0)
+                blur = gaussian_blur_manual(invert, ksize=21, sigma=0)
                 sketch = cv2.divide(gray, 255 - blur, scale=256)
 
             elif mode == "sobel":
@@ -58,9 +51,7 @@ async def post_imgs(
                 edges = prewitt_edge_manual(gray, 50)
                 sketch = 255 - edges
 
-            elif mode == "scharr":
-                edges = scharr_edge_manual(gray, 50)
-                sketch = 255 - edges
+
 
             elif mode == "laplacian":
                 edges = laplacian_edge_manual(gray, 30)
@@ -101,7 +92,7 @@ async def preview_img(
     gray = rgb2gray_manual(img)
     if mode == "pencil":
         invert = 255 - gray
-        blur = cv2.GaussianBlur(invert, (21, 21), 0)
+        blur = gaussian_blur_manual(invert, ksize=21, sigma=0)
         sketch = cv2.divide(gray, 255 - blur, scale=256)
 
     elif mode == "sobel":
@@ -113,9 +104,7 @@ async def preview_img(
         edges = prewitt_edge_manual(gray, 50)
         sketch = 255 - edges
 
-    elif mode == "scharr":
-        edges = scharr_edge_manual(gray, 50)
-        sketch = 255 - edges
+
 
     elif mode == "laplacian":
         edges = laplacian_edge_manual(gray, 30)
