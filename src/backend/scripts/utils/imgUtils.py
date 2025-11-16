@@ -62,3 +62,76 @@ def sobel_edge_manual(img, threshold1=50, threshold2=150):
     G[(G >= threshold1) & (G <= threshold2)] = 128
 
     return G.astype(np.uint8)
+
+def prewitt_edge_manual(img, threshold=50):
+    Kx = np.array([[-1,0,1],[-1,0,1],[-1,0,1]])
+    Ky = np.array([[1,1,1],[0,0,0],[-1,-1,-1]])
+
+    pad = 1
+    img_pad = np.pad(img, pad, mode='edge')
+
+    h, w = img.shape
+    G = np.zeros_like(img, dtype=np.float32)
+
+    for i in range(h):
+        for j in range(w):
+            region = img_pad[i:i+3, j:j+3]
+            gx = np.sum(region * Kx)
+            gy = np.sum(region * Ky)
+            G[i,j] = np.sqrt(gx**2 + gy**2)
+
+    G[G < threshold] = 0
+    G[G >= threshold] = 255
+    return G.astype(np.uint8)
+
+def scharr_edge_manual(img, threshold=50):
+    Kx = np.array([
+        [-3, 0, 3],
+        [-10,0,10],
+        [-3, 0, 3]
+    ])
+
+    Ky = np.array([
+        [3,10,3],
+        [0, 0, 0],
+        [-3,-10,-3]
+    ])
+
+    pad = 1
+    img_pad = np.pad(img, pad, mode='edge')
+    h, w = img.shape
+    G = np.zeros_like(img, dtype=np.float32)
+
+    for i in range(h):
+        for j in range(w):
+            region = img_pad[i:i+3, j:j+3]
+            gx = np.sum(region * Kx)
+            gy = np.sum(region * Ky)
+            G[i,j] = np.sqrt(gx**2 + gy**2)
+
+    G[G < threshold] = 0
+    G[G >= threshold] = 255
+    return G.astype(np.uint8)
+
+def laplacian_edge_manual(img, threshold=30):
+    K = np.array([
+        [0, -1, 0],
+        [-1, 4, -1],
+        [0, -1, 0]
+    ])
+
+    pad = 1
+    img_pad = np.pad(img, pad, mode='edge')
+
+    h, w = img.shape
+    G = np.zeros_like(img, dtype=np.float32)
+
+    for i in range(h):
+        for j in range(w):
+            region = img_pad[i:i+3, j:j+3]
+            G[i,j] = abs(np.sum(region * K))
+
+    G[G < threshold] = 0
+    G[G >= threshold] = 255
+    return G.astype(np.uint8)
+

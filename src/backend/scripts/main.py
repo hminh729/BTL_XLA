@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from controller import post_imgs
+from controller import *
 
 app = FastAPI()
 
@@ -20,3 +20,4 @@ def home(request: Request):
 
 # API xử lý ảnh
 app.post("/api/post-imgs")(post_imgs)
+app.post("/api/preview-img")(preview_img)

@@ -1,77 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Sketch Converter</title>
 
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #dfe9f3, #ffffff);
-            margin: 0;
+            background: #eef2f7;
             padding: 40px;
         }
 
         .container {
-            width: 600px;
+            width: 700px;
             margin: auto;
             background: white;
             padding: 25px;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
         }
 
         h2 {
             text-align: center;
-            margin-bottom: 20px;
-            color: #333;
         }
 
-        input[type="file"] {
+        input[type="file"], select {
             width: 100%;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 12px;
             border: 1px solid #ccc;
-            margin-bottom: 20px;
-        }
-
-        select {
-            width: 100%;
-            padding: 10px;
             border-radius: 8px;
-            border: 1px solid #bbb;
-            margin-bottom: 20px;
-            background: #f9f9f9;
-            cursor: pointer;
+            margin: 15px 0;
         }
 
         button {
-            padding: 12px 20px;
             width: 100%;
-            background: #007bff;
+            padding: 12px;
             border: none;
+            background: #007bff;
             color: white;
             border-radius: 8px;
-            cursor: pointer;
+            margin-top: 10px;
             font-size: 16px;
-            font-weight: bold;
+            cursor: pointer;
         }
 
-        button:hover {
-            background: #0056b3;
+        button:hover { background: #0056b3; }
+
+        #previewBox {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        #previewImg {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
         #status {
-            margin-top: 20px;
+            margin-top: 15px;
             text-align: center;
             font-weight: bold;
-            color: #444;
+            color: #333;
         }
     </style>
 </head>
@@ -82,56 +73,98 @@
     <h2>Sketch Image Converter</h2>
 
     <form id="uploadForm">
-        <input type="file" id="files" name="files" accept="image/*" multiple required>
+        <input type="file" id="fileInput" accept="image/*" required>
 
-        <label for="mode"><b>Chọn chế độ chuyển đổi:</b></label>
-        <select id="mode">
+        <label><b>Chọn chế độ:</b></label>
+        <select id="modeSelect">
             <option value="pencil">🎨 Pencil Sketch (Đẹp nhất)</option>
-            <option value="sobel">🧪 Sobel Sketch (Phiên bản cũ)</option>
+            <option value="sobel">🧪 Sobel Edge</option>
+            <option value="prewitt">📐 Prewitt Edge</option>
+            <option value="scharr">⚡ Scharr Edge</option>
+            <option value="laplacian">🔳 Laplacian Edge</option>
         </select>
 
-        <button type="submit">Convert to Sketch</button>
+        <button type="button" id="previewBtn">Xem Preview</button>
+        <button type="submit">Convert & Download ZIP</button>
     </form>
+
+    <div id="previewBox">
+        <h3>Preview từ Backend</h3>
+        <img id="previewImg" src="">
+    </div>
 
     <p id="status"></p>
 </div>
 
-<script>
-document.getElementById("uploadForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
 
-    const files = document.getElementById("files").files;
-    if (files.length === 0) {
-        alert("Vui lòng chọn ít nhất 1 ảnh!");
+<script>
+// ========================
+// PREVIEW TỪ BACKEND
+// ========================
+document.getElementById("previewBtn").addEventListener("click", async () => {
+    const fileEl = document.getElementById("fileInput");
+    const mode = document.getElementById("modeSelect").value;
+
+    if (!fileEl.files.length) {
+        alert("Vui lòng chọn 1 ảnh để xem preview!");
         return;
     }
 
     const formData = new FormData();
-    for (let file of files) {
-        formData.append("files", file);
-    }
+    formData.append("file", fileEl.files[0]);    // file gửi lên backend
+    formData.append("mode", mode);               // mode lựa chọn
 
-    // gửi chế độ (mode)
-    formData.append("mode", document.getElementById("mode").value);
+    document.getElementById("status").innerText = "Đang tạo preview...";
 
-    document.getElementById("status").innerText = "Processing... Please wait.";
-
-    const response = await fetch("/api/post-imgs", {
+    const res = await fetch("/api/preview-img", {
         method: "POST",
         body: formData
     });
 
-    const blob = await response.blob();
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
 
-    const url = window.URL.createObjectURL(blob);
+    document.getElementById("previewImg").src = url;
+    document.getElementById("status").innerText = "Preview đã sẵn sàng!";
+});
+
+
+// ========================
+// DOWNLOAD ZIP
+// ========================
+document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const fileEl = document.getElementById("fileInput");
+    const mode = document.getElementById("modeSelect").value;
+
+    if (!fileEl.files.length) {
+        alert("Vui lòng chọn ảnh!");
+        return;
+    }
+
+    const formData = new FormData();
+    for (let file of fileEl.files) {
+        formData.append("files", file);  // multi upload nếu cần
+    }
+    formData.append("mode", mode);
+
+    document.getElementById("status").innerText = "Đang xử lý và nén ZIP...";
+
+    const res = await fetch("/api/post-imgs", {
+        method: "POST",
+        body: formData
+    });
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+
     const a = document.createElement("a");
     a.href = url;
     a.download = "sketch_results.zip";
-    document.body.appendChild(a);
     a.click();
-    a.remove();
 
-    document.getElementById("status").innerText = "Done! ZIP downloaded.";
+    document.getElementById("status").innerText = "Đã tải ZIP!";
 });
 </script>
 
