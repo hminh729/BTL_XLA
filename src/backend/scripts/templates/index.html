@@ -1,43 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <title>Sketch Converter</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 30px;
-            background: #f2f2f2;
+            background: linear-gradient(135deg, #dfe9f3, #ffffff);
+            margin: 0;
+            padding: 40px;
         }
+
         .container {
-            width: 500px;
+            width: 600px;
             margin: auto;
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #ccc;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            animation: fadeIn 0.4s ease;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
         input[type="file"] {
-            margin: 20px 0;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
         }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #bbb;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+            cursor: pointer;
+        }
+
         button {
-            padding: 10px 20px;
+            padding: 12px 20px;
+            width: 100%;
             background: #007bff;
             border: none;
             color: white;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
         }
-        button:hover { background: #0056b3; }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #status {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #444;
+        }
     </style>
 </head>
+
 <body>
 
 <div class="container">
     <h2>Sketch Image Converter</h2>
+
     <form id="uploadForm">
         <input type="file" id="files" name="files" accept="image/*" multiple required>
-        <br>
+
+        <label for="mode"><b>Chọn chế độ chuyển đổi:</b></label>
+        <select id="mode">
+            <option value="pencil">🎨 Pencil Sketch (Đẹp nhất)</option>
+            <option value="sobel">🧪 Sobel Sketch (Phiên bản cũ)</option>
+        </select>
+
         <button type="submit">Convert to Sketch</button>
     </form>
 
@@ -50,7 +102,7 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
 
     const files = document.getElementById("files").files;
     if (files.length === 0) {
-        alert("Please choose at least one image!");
+        alert("Vui lòng chọn ít nhất 1 ảnh!");
         return;
     }
 
@@ -58,6 +110,9 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
     for (let file of files) {
         formData.append("files", file);
     }
+
+    // gửi chế độ (mode)
+    formData.append("mode", document.getElementById("mode").value);
 
     document.getElementById("status").innerText = "Processing... Please wait.";
 
@@ -68,7 +123,6 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
 
     const blob = await response.blob();
 
-    // Tải file ZIP về
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
