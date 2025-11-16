@@ -39,7 +39,8 @@ async def post_imgs(
                 #  tao anh am ban de tao hieu ung but chi
                 invert = 255 - gray
                 # Gaussian blur
-                blur = gaussian_blur_manual(invert, ksize=21, sigma=0)
+                # blur = gaussian_blur_manual(invert, ksize=21, sigma=0)
+                blur = cv2.GaussianBlur(invert, (21, 21), sigmaX=0, sigmaY=0)
                 sketch = cv2.divide(gray, 255 - blur, scale=256)
 
             elif mode == "sobel":
@@ -92,7 +93,8 @@ async def preview_img(
     gray = rgb2gray_manual(img)
     if mode == "pencil":
         invert = 255 - gray
-        blur = gaussian_blur_manual(invert, ksize=21, sigma=0)
+        # blur = gaussian_blur_manual(invert, ksize=21, sigma=0)
+        blur = cv2.GaussianBlur(invert, (21, 21), 0)
         sketch = cv2.divide(gray, 255 - blur, scale=256)
 
     elif mode == "sobel":

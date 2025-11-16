@@ -106,28 +106,28 @@ def laplacian_edge_manual(img, threshold=30):
     G[G >= threshold] = 255
     return G.astype(np.uint8)
 
-def gaussian_kernel(ksize=21, sigma=5):
-    """Tạo kernel Gaussian 2D."""
-    ax = np.linspace(-(ksize // 2), ksize // 2, ksize)
-    xx, yy = np.meshgrid(ax, ax)
-    kernel = np.exp(-(xx**2 + yy**2) / (2.0 * sigma**2))
-    kernel = kernel / np.sum(kernel)
-    return kernel
-
-
-def gaussian_blur_manual(img, ksize=21, sigma=5):
-    """Blur ảnh xám với kernel Gaussian thủ công."""
-    kernel = gaussian_kernel(ksize, sigma)
-    pad = ksize // 2
-    img_pad = np.pad(img, pad, mode='edge')
-
-    h, w = img.shape
-    out = np.zeros_like(img, dtype=np.float32)
-
-    for i in range(h):
-        for j in range(w):
-            region = img_pad[i:i + ksize, j:j + ksize]
-            out[i, j] = np.sum(region * kernel)
-
-    return out.astype(np.uint8)
-
+# def gaussian_kernel(ksize=21, sigma=5):
+#     """Tạo kernel Gaussian 2D."""
+#     ax = np.linspace(-(ksize // 2), ksize // 2, ksize)
+#     xx, yy = np.meshgrid(ax, ax)
+#     kernel = np.exp(-(xx**2 + yy**2) / (2.0 * sigma**2))
+#     kernel = kernel / np.sum(kernel)
+#     return kernel
+#
+#
+# def gaussian_blur_manual(img, ksize=21, sigma=5):
+#     """Blur ảnh xám với kernel Gaussian thủ công."""
+#     kernel = gaussian_kernel(ksize, sigma)
+#     pad = ksize // 2
+#     img_pad = np.pad(img, pad, mode='edge')
+#
+#     h, w = img.shape
+#     out = np.zeros_like(img, dtype=np.float32)
+#
+#     for i in range(h):
+#         for j in range(w):
+#             region = img_pad[i:i + ksize, j:j + ksize]
+#             out[i, j] = np.sum(region * kernel)
+#
+#     return out.astype(np.uint8)
+#
